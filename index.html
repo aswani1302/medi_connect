@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Healthcare App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background: #005b96;
+      color: white;
+      padding: 1em;
+      text-align: center;
+    }
+    .hero-image {
+      width: 100%;
+      max-height: 250px;
+      object-fit: cover;
+      display: block;
+    }
+    .container {
+      padding: 1.5em;
+      max-width: 800px;
+      margin: auto;
+    }
+    h2 {
+      margin-top: 1.5em;
+      color: #005b96;
+    }
+    input, textarea, button, select {
+      width: 100%;
+      padding: 0.75em;
+      margin-top: 0.5em;
+      margin-bottom: 1em;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      background: #0074d9;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    ul {
+      list-style: disc inside;
+    }
+    .tab-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 1em;
+    }
+    .tab-buttons button {
+      flex: 1;
+      margin: 0 0.2em;
+      background: #ccc;
+    }
+    .tab-buttons button.active {
+      background: #0074d9;
+      color: white;
+    }
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+    .reminder-toggle {
+      display: flex;
+      align-items: center;
+    }
+    .reminder-toggle input {
+      margin-left: 1em;
+      width: auto;
+    }
+    .image-preview {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-top: 10px;
+      display: none;
+    }
+    @media (max-width: 600px) {
+      .tab-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>My Health Tracker</h1>
+</header>
+
+<!-- Banner Image -->
+<img src="https://www.who.int/images/default-source/health-topics/coronavirus/myth-busters/mb-mask.png" alt="Medical Banner" class="hero-image">
+
+<div class="container">
+  <!-- Profile Photo Upload -->
+  <h2>Profile Photo</h2>
+  <input type="file" accept="image/*" id="profileInput" />
+  <img id="profilePic" class="image-preview" alt="Profile Preview"/>
+
+  <!-- Tabs -->
+  <div class="tab-buttons">
+    <button onclick="switchTab('meds')" class="active">Medications</button>
+    <button onclick="switchTab('notes')">Conditions</button>
+    <button onclick="switchTab('appointments')">Appointments</button>
+    <button onclick="switchTab('chat')">Chat</button>
+  </div>
+
+  <!-- Medications Section -->
+  <div id="meds" class="section active">
+    <h2>Medication Tracker</h2>
+    <input type="text" id="medInput" placeholder="Enter medication name" />
+    <button onclick="addMedication()">Add Medication</button>
+    <ul id="medList"></ul>
+    <div class="reminder-toggle">
+      <label for="reminder">Enable reminders:</label>
+      <input type="checkbox" id="reminder" checked />
+    </div>
+  </div>
+
+  <!-- Conditions Section -->
+  <div id="notes" class="section">
+    <h2>Condition Notes</h2>
+    <textarea rows="6" placeholder="Describe your symptoms or health condition..."></textarea>
+    <h3>Upload Condition Image</h3>
+    <input type="file" accept="image/*" id="conditionInput" />
+    <img id="conditionImg" class="image-preview" alt="Condition Preview"/>
+  </div>
+
+  <!-- Appointments Section -->
+  <div id="appointments" class="section">
+    <h2>Schedule an Appointment</h2>
+    <label for="appointmentDate">Select Date:</label>
+    <input type="date" id="appointmentDate" />
+    <button onclick="bookAppointment()">Book Appointment</button>
+  </div>
+
+  <!-- Chat Section -->
+  <div id="chat" class="section">
+    <h2>Message Your Doctor</h2>
+    <textarea rows="5" placeholder="Type your message here..."></textarea>
+    <button onclick="sendMessage()">Send Message</button>
+  </div>
+</div>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.section').forEach(section => {
+      section.classList.remove('active');
+    });
+    document.getElementById(tab).classList.add('active');
+
+    document.querySelectorAll('.tab-buttons button').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+  }
+
+  function addMedication() {
+    const input = document.getElementById('medInput');
+    const med = input.value.trim();
+    if (med) {
+      const ul = document.getElementById('medList');
+      const li = document.createElement('li');
+      li.textContent = med;
+      ul.appendChild(li);
+      saveMedication(med);
+      input.value = '';
+    }
+  }
+
+  function saveMedication(med) {
+    const meds = JSON.parse(localStorage.getItem('medications') || '[]');
+    meds.push(med);
+    localStorage.setItem('medications', JSON.stringify(meds));
+  }
+
+  function loadMedications() {
+    const meds = JSON.parse(localStorage.getItem('medications') || '[]');
+    meds.forEach(med => {
+      const li = document.createElement('li');
+      li.textContent = med;
+      document.getElementById('medList').appendChild(li);
+    });
+  }
+
+  function bookAppointment() {
+    const date = document.getElementById('appointmentDate').value;
+    if (date) {
+      alert('Appointment booked on ' + date);
+    } else {
+      alert('Please select a date.');
+    }
+  }
+
+  function sendMessage() {
+    alert('Message sent to your healthcare provider.');
+  }
+
+  function previewImage(inputId, imgId) {
+    const input = document.getElementById(inputId);
+    const image = document.getElementById(imgId);
+
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        image.src = e.target.result;
+        image.style.display = "block";
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  document.getElementById('profileInput').addEventListener('change', () => {
+    previewImage('profileInput', 'profilePic');
+  });
+
+  document.getElementById('conditionInput').addEventListener('change', () => {
+    previewImage('conditionInput', 'conditionImg');
+  });
+
+  window.onload = loadMedications;
+</script>
+
+</body>
+</html>
